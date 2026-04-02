@@ -560,6 +560,16 @@ async function fetchSheet(hoja) {
   return { rows, cols };
 }
 
+function arreglarURLDrive(url) {
+  if (!url) return null;
+  // Convertir cualquier formato de Drive a thumbnail que siempre funciona
+  var match = url.match(/id=([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w800";
+  }
+  return url;
+}
+
 function cellVal(row, idx) {
   if (!row.c || !row.c[idx]) return '';
   const c = row.c[idx];
@@ -622,7 +632,8 @@ async function cargarTodo() {
         for (let i = 0; i < CONFIG.TOTAL_IMAGENES; i++) {
           const val = cellVal(r, CONFIG.COL.IMAGEN1WEB + i);
           if (!val || !val.trim()) continue;
-          if (val.startsWith('http')) imagenes.push(val);
+          const urlFixed = arreglarURLDrive(val);
+          if (urlFixed) imagenes.push(urlFixed);
         }
         const inicia = cellVal(r, CONFIG.COL.ANUNCIO_INICIA);
         const finaliza = cellVal(r, CONFIG.COL.ANUNCIO_FINALIZA);
