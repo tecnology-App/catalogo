@@ -447,7 +447,9 @@ const CONFIG = {
   HOJA_USUARIOS: 'USUARIOS',
   HOJA_MEDIDAS: 'MEDIDAS_PRENDAS',
 
-  // Columnas PRODUCTOS (índice desde 0, basado en el orden de tu sheet)
+  // Columnas PRODUCTOS (índice desde 0, basado en el orden real del sheet)
+  // A=0  B=1             C=2            D=3          E=4          F=5          G=6       H=7           I=8               J=9      K=10   L=11        M=12     N=13    O=14           P=15              Q=16           R=17
+  // ID   EMAIL_DIST      FECHA_CREACION COD_INTERNO  NOMBRE_PROD  DESCRIPCION  CATEGORIA SUB_CATEGORIA TALLA_EXISTENCIA  ESTADO   COSTO  COSTO_MEDIA MARGEN   PRECIO  ANUNCIO_INICIA ANUNCIO_FINALIZA  ANUNCIO_TEXTO  IMAGEN1...
   COL: {
     ID_PRODUCTO: 0,
     EMAIL_DISTRIBUIDOR: 1,
@@ -467,17 +469,24 @@ const CONFIG = {
     ANUNCIO_FINALIZA: 15,
     ANUNCIO_TEXTO: 16,
     IMAGEN1: 17,
-    // IMAGEN2..IMAGEN10 se calculan automáticamente
   },
 
   // Columnas USUARIOS (índice desde 0)
+  // A=0              B=1            C=2           D=3              E=4         F=5              G=6    H=7          I=8      J=9          K=10
+  // ID_DISTRIBUIDOR  NOMBRE_TIENDA  NOMBRE_DUEÑO  WHATSAPP_TIENDA  TEL_PROP    EMAIL_DISTRIB    PLAN   ESTADO_PAGO  ESTADO   FECHA_PAGO   ENLACE_CORTO
   COL_USR: {
     ID_DISTRIBUIDOR: 0,
-    NOMBRE_TIENDA: 2,
-    NOMBRE_DUEÑO: 3,
-    WHATSAPP_TIENDA: 4,
-    EMAIL_DISTRIBUIDOR: 6,
-    LOGO_TIENDA: 11, // ajusta si tienes esta columna
+    NOMBRE_TIENDA: 1,
+    NOMBRE_DUEÑO: 2,
+    WHATSAPP_TIENDA: 3,
+    TEL_PROPIETARIO: 4,
+    EMAIL_DISTRIBUIDOR: 5,
+    PLAN: 6,
+    ESTADO_PAGO: 7,
+    ESTADO: 8,
+    FECHA_PAGO: 9,
+    ENLACE_CORTO: 10,
+    LOGO_TIENDA: 11, // agregar esta columna en tu Sheet cuando tengas los logos
   },
 
   // Columnas MEDIDAS_PRENDAS (índice desde 0)
@@ -611,7 +620,8 @@ async function cargarTodo() {
         const imagenes = [];
         for (let i = 0; i < CONFIG.TOTAL_IMAGENES; i++) {
           const val = cellVal(r, CONFIG.COL.IMAGEN1 + i);
-          if (val && val.startsWith('http')) imagenes.push(val);
+          if (!val || !val.trim()) continue;
+          if (val.startsWith('http')) imagenes.push(val);
         }
         const inicia = cellVal(r, CONFIG.COL.ANUNCIO_INICIA);
         const finaliza = cellVal(r, CONFIG.COL.ANUNCIO_FINALIZA);
