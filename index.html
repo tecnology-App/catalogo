@@ -469,6 +469,7 @@ const CONFIG = {
     ANUNCIO_FINALIZA: 15,
     ANUNCIO_TEXTO: 16,
     IMAGEN1: 17,
+    IMAGEN1WEB: 27,
   },
 
   // Columnas USUARIOS (índice desde 0)
@@ -619,7 +620,7 @@ async function cargarTodo() {
       .map(r => {
         const imagenes = [];
         for (let i = 0; i < CONFIG.TOTAL_IMAGENES; i++) {
-          const val = cellVal(r, CONFIG.COL.IMAGEN1 + i);
+          const val = cellVal(r, CONFIG.COL.IMAGEN1WEB + i);
           if (!val || !val.trim()) continue;
           if (val.startsWith('http')) imagenes.push(val);
         }
