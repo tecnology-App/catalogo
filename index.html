@@ -465,6 +465,14 @@ async function cargarTodo() {
       }
     }
 
+    console.log('Total filas PRODUCTOS:', pData.rows.length);
+    console.log('Email buscado:', emailTienda);
+    if (pData.rows.length > 0) {
+      const primeraFila = pData.rows[0];
+      console.log('Email fila1:', cellVal(primeraFila, CONFIG.COL.EMAIL_DISTRIBUIDOR));
+      console.log('Estado fila1:', cellVal(primeraFila, CONFIG.COL.ESTADO));
+    }
+
     todosLosProductos = pData.rows
       .filter(r => {
         const email = cellVal(r, CONFIG.COL.EMAIL_DISTRIBUIDOR);
