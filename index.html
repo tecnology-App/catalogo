@@ -507,8 +507,10 @@ async function cargarTodo() {
     document.getElementById('brand-logo').src = CONFIG.LOGO_TECNOLOGYAPP;
 
   } catch (e) {
-    console.error(e);
-    mostrarError();
+    console.error('ERROR EN CARGA:', e.message, e.stack);
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('error-msg').innerHTML = '<h2>Error</h2><p>' + e.message + '</p>';
   }
 }
 
