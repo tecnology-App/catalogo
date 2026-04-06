@@ -428,11 +428,11 @@ async function cargarTodo() {
   if (!emailTienda) { mostrarError(); return; }
 
   try {
-    const [pData, uData, mData] = await Promise.all([
+    const [pData, uData] = await Promise.all([
       fetchSheet(CONFIG.HOJA_PRODUCTOS),
       fetchSheet(CONFIG.HOJA_USUARIOS),
-      fetchSheet(CONFIG.HOJA_MEDIDAS).catch(() => null),
     ]);
+    const mData = await fetchSheet(CONFIG.HOJA_MEDIDAS).catch(() => null);
 
     const usuarioRow = uData.rows.find(r => {
       const email = cellVal(r, CONFIG.COL_USR.EMAIL_DISTRIBUIDOR);
@@ -451,14 +451,18 @@ async function cargarTodo() {
       tipoCambio: cellVal(usuarioRow, CONFIG.COL_USR.TIPO_CAMBIO),
     };
 
-    if (mData) {
-      const medCols = mData.cols.slice(2);
-      mData.rows.forEach(r => {
-        const idProd = cellVal(r, CONFIG.COL_MED.ID_PRODUCTO);
-        if (!idProd) return;
-        if (!medidasData[idProd]) medidasData[idProd] = { cols: medCols, filas: [] };
-        medidasData[idProd].filas.push(medCols.map((_, i) => cellVal(r, i + 2)));
-      });
+    if (mData && mData.rows && mData.rows.length > 0 && mData.cols && mData.cols.length > 2) {
+      try {
+        const medCols = mData.cols.slice(2);
+        mData.rows.forEach(r => {
+          const idProd = cellVal(r, CONFIG.COL_MED.ID_PRODUCTO);
+          if (!idProd) return;
+          if (!medidasData[idProd]) medidasData[idProd] = { cols: medCols, filas: [] };
+          medidasData[idProd].filas.push(medCols.map((_, i) => cellVal(r, i + 2)));
+        });
+      } catch(medErr) {
+        console.warn('Medidas no disponibles:', medErr.message);
+      }
     }
 
     todosLosProductos = pData.rows
@@ -496,9 +500,11 @@ async function cargarTodo() {
         };
       });
 
+    console.log('Productos cargados:', todosLosProductos.length);
     renderTienda();
     renderFiltros();
     aplicarFiltros();
+    console.log('Render completado');
     document.getElementById('loader').style.display = 'none';
     document.getElementById('store-header').style.display = 'block';
     document.getElementById('filters-section').style.display = 'block';
