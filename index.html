@@ -945,6 +945,14 @@ function abrirCarrito() {
 function cerrarCarrito() {
   document.getElementById('cart-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Restaurar botón confirmar
+  const btn = document.getElementById('btn-pro-cart');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '✅ Confirmar pedido';
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  }
 }
 
 function renderCarrito() {
@@ -1005,6 +1013,15 @@ function enviarPedidoWA() {
 
 async function confirmarPedidoPRO() {
   if (!carrito.length) return;
+  
+  // Deshabilitar botón para evitar pedidos duplicados
+  const btn = document.getElementById('btn-pro-cart');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Procesando pedido...';
+  btn.style.opacity = '0.7';
+  btn.style.cursor = 'not-allowed';
+
   const c = carrito[0];
 
   const idPedido = 'PED-' + Date.now();
@@ -1034,6 +1051,11 @@ async function confirmarPedidoPRO() {
 
   } catch(err) {
     console.error(err);
+    // Restaurar botón si hay error
+    btn.disabled = false;
+    btn.innerHTML = '✅ Confirmar pedido';
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
     // Si falla el guardado, fallback a WhatsApp
     enviarPedidoWA();
   }
