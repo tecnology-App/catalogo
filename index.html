@@ -85,6 +85,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--texto);
 
 /* BADGES */
 .bdg-wrap{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px;z-index:3}
+.bdg-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
 .bdg{font-size:10px;font-weight:800;padding:3px 8px;border-radius:50px;letter-spacing:.5px;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.2);width:fit-content}
 .bdg-of{background:linear-gradient(90deg,#ff6b35,#ff4757);color:#fff}
 .bdg-ag{background:#718096;color:#fff}
@@ -542,12 +543,24 @@ async function init() {
 
     if (tabMed && tabMed.rows && tabMed.rows.length > 0 && tabMed.cols && tabMed.cols.length > 2) {
       try {
-        const cols = tabMed.cols.slice(2);
+        // Obtener labels limpios, saltar primeras 2 cols (ID_MEDIDA, ID_PRODUCTO)
+        // y excluir columnas de email/distribuidor
+        const colsInfo = [];
+        tabMed.cols.forEach((c, i) => {
+          if (i < 2) return; // saltar ID_MEDIDA e ID_PRODUCTO
+          const lbl = typeof c === 'object' ? (c.label || c.id || '') : String(c);
+          if (lbl.toLowerCase().includes('email') || lbl.toLowerCase().includes('distribuidor')) return;
+          colsInfo.push({ label: lbl, idx: i });
+        });
+        
         tabMed.rows.forEach(r => {
           const id = cellVal(r, M.IDPROD);
           if (!id) return;
-          if (!medidas[id]) medidas[id] = { cols, filas:[] };
-          medidas[id].filas.push(cols.map((_,i) => cellVal(r, i+2)));
+          if (!medidas[id]) medidas[id] = { 
+            headers: colsInfo.map(c => c.label), 
+            filas: [] 
+          };
+          medidas[id].filas.push(colsInfo.map(c => cellVal(r, c.idx)));
         });
       } catch(e) { console.warn('Medidas:', e); }
     }
@@ -697,20 +710,21 @@ function crearCard(prod, idx) {
     car.appendChild(bp); car.appendChild(bn);
   }
 
-  const bw = document.createElement('div'); bw.className='bdg-wrap';
-  if (prod.tieneAnuncio) { const b=document.createElement('div'); b.className='bdg bdg-of'; b.textContent='🔥 Oferta'; bw.appendChild(b); }
-  if (ss==='ag') { const b=document.createElement('div'); b.className='bdg bdg-ag'; b.textContent='Agotado'; bw.appendChild(b); }
-  else if (ss==='ul') { const b=document.createElement('div'); b.className='bdg bdg-ul'; b.textContent='⚡ Últimas'; bw.appendChild(b); }
-  car.appendChild(bw);
   card.appendChild(car);
 
   // Body
   const body = document.createElement('div'); body.className='cbody';
+  const bdgHtml = [
+    prod.tieneAnuncio ? '<span class="bdg bdg-of">🔥 Oferta</span>' : '',
+    ss==='ag' ? '<span class="bdg bdg-ag">Agotado</span>' : '',
+    ss==='ul' ? '<span class="bdg bdg-ul">⚡ Últimas</span>' : ''
+  ].filter(Boolean).join('');
   body.innerHTML = `
     <div class="c-cod">#${prod.codigo||prod.id}</div>
     <div class="c-nom">${prod.nombre}</div>
     <div class="c-cat">${[prod.cat,prod.subcat].filter(Boolean).join(' › ')}</div>
     ${prod.tallas?`<div class="c-tal">📏 ${prod.tallas}</div>`:''}
+    ${bdgHtml ? `<div class="bdg-row">${bdgHtml}</div>` : ''}
     <div class="c-pre ${ss==='ag'?'ag':''}">${formatPrecio(prod.precio,tienda.simbolo)}</div>
   `;
   card.appendChild(body);
@@ -1062,8 +1076,10 @@ function abrirModal(prod) {
   const med=medidas[prod.id];
   if(med&&med.filas.length>0){
     medWrap.style.display='block';
-    const enc=med.cols.map(c=>c.label||c).filter(Boolean);
-    document.getElementById('m-med-tbl').innerHTML=`<tr>${enc.map(h=>`<th>${h}</th>`).join('')}</tr>`+med.filas.map(f=>`<tr>${f.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');
+    const enc = med.headers || [];
+    document.getElementById('m-med-tbl').innerHTML = 
+      `<tr>${enc.map(h=>`<th>${h}</th>`).join('')}</tr>` + 
+      med.filas.map(f=>`<tr>${f.map(v=>`<td>${v||''}</td>`).join('')}</tr>`).join('');
   } else medWrap.style.display='none';
 
   const anuWrap=document.getElementById('m-anu-wrap');
