@@ -519,8 +519,7 @@ async function fetchSheetCSV(hoja) {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(hoja)}`;
   const res = await fetch(url);
   const text = await res.text();
-  const rows = text.split('
-').map(r => {
+  const rows = text.split('\n').map(r => {
     const result = [];
     let cur = '', inQ = false;
     for (const ch of r) {
