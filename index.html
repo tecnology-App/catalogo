@@ -1042,7 +1042,7 @@ async function confirmarPedidoPRO() {
 async function guardarPedidoEnSheet(pedido, items) {
   // Este endpoint se configura en Apps Script como Web App
   // La URL se actualiza cuando se configure el script de pedidos
-  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwpNxn-_T4QkhTgeptuKSapLXlzPPzbvYgd2wP73JXFd_5B9Y8hAtoC6pKbMdXQ4XbD/exec';
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycby7JJHlJS86O4m7yk8-0JAakHe9v3vi7il-gPt2a3gkPLoDN2Leu44nGgXBNx9d_Fk/exec';
   const res = await fetch(ENDPOINT, {
     method:'POST',
     body: JSON.stringify({tipo:'pedido', pedido, items}),
